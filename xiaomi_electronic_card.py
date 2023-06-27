@@ -16,7 +16,7 @@ import tkinter.filedialog
 from tkinter import scrolledtext
 from fake_useragent import FakeUserAgent
 import hashlib
-from xiaomiapi import get_captcha_image
+from xiaomiapi import *
 
 root = Tk()
 #root.attributes("-alpha", 0.8)
@@ -40,18 +40,129 @@ y = int((screenHeight - winHeight) / 2)
 root.geometry("%sx%s+%s+%s" % (winWidth, winHeight, x, y))
 root.resizable(0,0)
 port = StringVar()
+VC_WARRANTY_TOKEN = ''
+data_stream = ''
+UUID = ''
+
+lvalue = StringVar()
+lvalue.set("变量值")
+
+timeleftvalue = StringVar()
+timeleftvalue.set("距离保修过期还有: 000 天")
+
+def loading_captcha():
+    try:
+        html = requests.get("https://chat.kefu.mi.com")
+    except Exception as e:
+        tkinter.messagebox.showerror(title='失败',message='网络连接失败\n您可以通过以下操作来帮助您排除网络问题\n\n1. 如果您打开了代理（Clash,Socks), 请将它关闭.\n2.检查网络是否通畅.\n3.检查路由器等设施是否正确连接到互联网.\n4.您压根没有连接到互联网.')
+        return 0
+    global VC_WARRANTY_TOKEN,data_stream,UUID
+    VC_WARRANTY_TOKEN,data_stream = get_captcha_image()
+    UUID = get_activation_uuid()
+    pil_image = Image.open(data_stream)
+    global tk_image
+    tk_image = ImageTk.PhotoImage(pil_image)
+    label_captcha.config(image=tk_image)
+    label_captcha.image=tk_image
+    label_captcha.pack(fill=BOTH, expand='yes')
+
+def check_code(mode):
+        if len(inp1.get()) == 0 and len(inp2.get()) == 0: 
+            tkinter.messagebox.showerror(title='错误', message="哦吼！！您似乎啥也没输入？，请再试一次")
+            return 0
+        if len(inp1.get()) == 0: 
+            tkinter.messagebox.showerror(title='错误', message="哦吼！！您似乎没输入设备串号？，请再试一次")
+            return 0
+        if len(inp2.get()) == 0: 
+            tkinter.messagebox.showerror(title='错误', message="哦吼！！您似乎没输入验证码？，请再试一次")
+            return 0
+        
+        if mode == 'repair':
+            key = inp1.get().replace("\n", "").upper()
+            captcha_code = inp2.get().replace("\n", "")
+            post_device_info(key,captcha_code)
+        elif  mode == 'activation':
+            key = inp1.get().replace("\n", "").upper()
+            post_device_info(key,captcha_code)
+        else:
+            tkinter.messagebox.showerror(title='错误', message="未知指令")
+
+def backcheckbutton_loading_captcha():
+    try:
+        html = requests.get("https://chat.kefu.mi.com")
+    except Exception as e:
+        tkinter.messagebox.showerror(title='失败',message='网络连接失败\n您可以通过以下操作来帮助您排除网络问题\n\n1. 如果您打开了代理（Clash,Socks), 请将它关闭.\n2.检查网络是否通畅.\n3.检查路由器等设施是否正确连接到互联网.\n4.您压根没有连接到互联网.')
+        return 0
+    loading_captcha()
+    forget_and_back_windows(mode='back')
+
+def forget_and_back_windows(mode):
+    if mode == 'forget':
+        lf1.place_forget()
+        postbutton.place_forget()
+    elif  mode == 'back':
+        lf1.place(x=8, y=8,width=330,height=150)
+        postbutton.place(x=125,y=200)
+        full_device_info_lf.place_forget()
+        curt_device_info_lf.place_forget()
+        backcheckbutton.place_forget()
+
+def post_device_info(key,captcha_code):
+    try:
+        html = requests.get("https://chat.kefu.mi.com")
+    except Exception as e:
+        tkinter.messagebox.showerror(title='失败',message='网络连接失败\n您可以通过以下操作来帮助您排除网络问题\n\n1. 如果您打开了代理（Clash,Socks), 请将它关闭.\n2.检查网络是否通畅.\n3.检查路由器等设施是否正确连接到互联网.\n4.您压根没有连接到互联网.')
+        return 0
+    get_state,repair_state,get_msg,all_info,timeleft,repair_end = get_activation_info(VC_WARRANTY_TOKEN,UUID,key,captcha_code)
+    if get_state == '200':
+        full_device_info_text.config(state=NORMAL)
+        forget_and_back_windows(mode='forget')
+        full_device_info_lf.place(x=8, y=155,width=200,height=150)
+        full_device_info_text.pack(fill=BOTH, expand='yes')
+        curt_device_info_lf.place(x=8, y=8,width=330,height=145)
+        curt_device_info_label.pack(anchor=CENTER, expand='yes')
+        timeleft_device_info_label.pack(anchor=S)
+        backcheckbutton.place(x=235,y=220)
+        finally_timeleft = '距离保修过期还有: {} 天'.format(timeleft)
+        if repair_state == '已失效':
+            curt_device_info_label.config(foreground="red")
+        elif repair_state == '未失效':
+            curt_device_info_label.config(foreground="green")
+        else:
+            curt_device_info_label.config(foreground="black")
+        lvalue.set(repair_state)
+        timeleftvalue.set(finally_timeleft)
+        full_device_info_text.delete("1.0","end")
+        full_device_info_text.insert("end", all_info)
+        full_device_info_text.config(state=DISABLED)
+    else:
+        tkinter.messagebox.showerror(title='失败',message=get_msg)
+        loading_captcha()
 
 lf1 = tkinter.ttk.LabelFrame(root,text="设备信息")
 lf1.place(x=8, y=8,width=330,height=150)
 
-Label(lf1, text="教师账号").place(x=40,y=30)
-inp1 = Entry(lf1, relief=GROOVE)
-inp1.place(x=120, y=30)
-Label(lf1, text="密码").place(x=50,y=80)
-inp2 = Entry(lf1, relief=GROOVE,textvariable = port)
-port.set('填写验证码')
-inp2.place(x=120, y=80)
+captcha_lf = tkinter.ttk.LabelFrame(lf1,text="验证码")
+captcha_lf.place(x=175,y=55,width=120,height=70)
+label_captcha = Label(captcha_lf, bg='white')
 
+Label(lf1, text="设备串号").place(x=20,y=30)
+inp1 = tkinter.ttk.Entry(lf1,textvariable = port,width=27)
+inp1.place(x=100, y=30)
+Label(lf1, text="验证码").place(x=30,y=80)
+inp2 = tkinter.ttk.Entry(lf1,width=8)
+port.set('S/N 或 IMEI')
+inp2.place(x=100, y=80)
+backcheckbutton = tkinter.ttk.Button(root,text="重新查询",command=lambda:backcheckbutton_loading_captcha())
+full_device_info_lf = tkinter.ttk.LabelFrame(root,text="详细信息")
+curt_device_info_lf = tkinter.ttk.LabelFrame(root,text="保修状态")
+timeleft_device_info_label = tkinter.ttk.Label(curt_device_info_lf,textvariable=timeleftvalue,foreground="black",font=("黑体", 12))
+curt_device_info_label = tkinter.ttk.Label(curt_device_info_lf,textvariable=lvalue,font=("黑体", 30))
+full_device_info_text = scrolledtext.ScrolledText(full_device_info_lf, font=('Consolas', 10))
 
+loading_captcha()
+
+postbutton = tkinter.ttk.Button(root,text="立即查询", command = lambda:check_code(mode='repair'))
+postbutton.place(x=125,y=200)
 
 root.mainloop()

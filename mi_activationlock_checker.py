@@ -5,7 +5,7 @@ import json
 import datetime
 import time
 
-def send_request(strImei):
+def send_request(imei):
     # Request
     # GET https://i.mi.com/support/anonymous/status
 
@@ -13,7 +13,7 @@ def send_request(strImei):
         response = requests.get(
             url="https://i.mi.com/support/anonymous/status",
             params={
-                "id": strImei,
+                "id": imei,
                 "ts": int(time.time()*1000) # timestamp added
             },
         )
