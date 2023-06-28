@@ -72,23 +72,25 @@ def get_activation_info(VC_WARRANTY_TOKEN,UUID,key,captcha_code):
     res = requests.get(url=url,headers=headers)
 
     getjson = json.loads(res.content)
-    print(getjson)
+    #print(getjson)
 
     get_state = str(re.findall('"code":(.*?),', str(res.text))).replace("'",'').replace(']','').replace('[','')
 
     if get_state == '200':
         all_data_info = getjson["data"]
         if all_data_info == None:
-            print("S/N 或 IMEI 码输入错误，请再试一次")
+            #print("S/N 或 IMEI 码输入错误，请再试一次")
             return 0
         else:
             baseinfo = all_data_info["baseInfo"]
             serviceinfo = all_data_info["serviceInfo"]
             #print(all_data_info)
             check_state = '获取成功'
-            print(check_state)
+            #print(check_state)
             #get_data = str(re.findall('"data":{(.*?)}', str(res.text)))
             goodsname = baseinfo["goodsName"]
+            device_sn = baseinfo["sn"]
+            device_imei = baseinfo["imei"]
             activetime = baseinfo["activeTime"]
 
             try:
@@ -113,13 +115,13 @@ def get_activation_info(VC_WARRANTY_TOKEN,UUID,key,captcha_code):
             else:
                 repair_state = '未失效'
             get_msg = getjson["msg"]
-            all_info = '商品名称:{0}\n激活时间:{1}\n保修开始时间:{2}\n保修结束时间:{3}\n保修状态:{4}\n保修剩余天数:{5}'.format(goodsname,activetime,repair_start,repair_end,repair_state,timeleft)
+            all_info = '商品名称:{0}\nSN 码:{1}\nIMEI 码:{2}\n激活时间:{3}\n保修开始时间:{4}\n保修结束时间:{5}\n保修状态:{6}\n保修剩余天数:{7}'.format(goodsname,device_sn,device_imei,activetime,repair_start,repair_end,repair_state,timeleft)
             #print(all_info)
     else:
         check_state = '获取失败'
-        print(check_state)
+        #print(check_state)
         get_msg = getjson["msg"]
-        print(get_msg)
+        #print(get_msg)
     
     return get_state,repair_state,get_msg,all_info,timeleft,repair_end
 

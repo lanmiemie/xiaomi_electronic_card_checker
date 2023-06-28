@@ -124,8 +124,11 @@ def post_device_info(key,captcha_code):
         curt_device_info_label.pack(anchor=CENTER, expand='yes')
         timeleft_device_info_label.pack(anchor=S)
         backcheckbutton.place(x=235,y=220)
+
         if timeleft == "未知":
             finally_timeleft = '距离保修过期还有: {}'.format(timeleft)
+        elif  timeleft == 0:
+            finally_timeleft = '该设备的保修已过期'
         else:
             finally_timeleft = '距离保修过期还有: {} 天'.format(timeleft)
 
@@ -135,6 +138,7 @@ def post_device_info(key,captcha_code):
             curt_device_info_label.config(foreground="green")
         else:
             curt_device_info_label.config(foreground="black")
+
         lvalue.set(repair_state)
         timeleftvalue.set(finally_timeleft)
         full_device_info_text.delete("1.0","end")
