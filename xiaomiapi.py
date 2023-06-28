@@ -92,11 +92,26 @@ def get_activation_info(VC_WARRANTY_TOKEN,UUID,key,captcha_code):
             #get_data = str(re.findall('"data":{(.*?)}', str(res.text)))
             goodsname = baseinfo["goodsName"]
             activetime = baseinfo["activeTime"]
-            repair_start = serviceinfo["repairStartTime"]
-            repair_end = serviceinfo["repairEndTime"]
-            timeleft = serviceinfo["timeLeft"]
+            
+            try:
+                repair_start = serviceinfo["repairStartTime"]
+            except Exception as e:
+                repair_start = "未知"
+
+            try:
+                repair_end = serviceinfo["repairEndTime"]
+            except Exception as e:
+                repair_end = "未知"
+
+            try:
+                timeleft = serviceinfo["timeLeft"]
+            except Exception as e:
+                timeleft = "未知"
+
             if timeleft == 0:
                 repair_state = '已失效'
+            elif  timeleft == "未知":
+                repair_state = '未知'
             else:
                 repair_state = '未失效'
             get_msg = getjson["msg"]

@@ -113,7 +113,8 @@ def post_device_info(key,captcha_code):
     except Exception as e:
         tkinter.messagebox.showerror(title='失败',message='网络连接失败\n您可以通过以下操作来帮助您排除网络问题\n\n1. 如果您打开了代理（Clash,Socks), 请将它关闭.\n2.检查网络是否通畅.\n3.检查路由器等设施是否正确连接到互联网.\n4.您压根没有连接到互联网.')
         return 0
-    get_state,repair_state,get_msg,all_info,timeleft,repair_end = get_activation_info(VC_WARRANTY_TOKEN,UUID,key,captcha_code)
+    
+    get_state, repair_state, get_msg, all_info, timeleft, repair_end = get_activation_info(VC_WARRANTY_TOKEN, UUID, key, captcha_code)
     if get_state == '200':
         full_device_info_text.config(state=NORMAL)
         forget_and_back_windows(mode='forget')
@@ -123,7 +124,11 @@ def post_device_info(key,captcha_code):
         curt_device_info_label.pack(anchor=CENTER, expand='yes')
         timeleft_device_info_label.pack(anchor=S)
         backcheckbutton.place(x=235,y=220)
-        finally_timeleft = '距离保修过期还有: {} 天'.format(timeleft)
+        if timeleft == "未知":
+            finally_timeleft = '距离保修过期还有: {}'.format(timeleft)
+        else:
+            finally_timeleft = '距离保修过期还有: {} 天'.format(timeleft)
+
         if repair_state == '已失效':
             curt_device_info_label.config(foreground="red")
         elif repair_state == '未失效':
