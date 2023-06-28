@@ -23,8 +23,6 @@ def get_captcha_image():
     res = requests.get(url=url,headers=headers)
     image_bytes = res.content
     data_stream = io.BytesIO(image_bytes)
-    image = open('a.png', 'wb')
-    image.write(image_bytes)
 
     VC_WARRANTY_TOKEN = 'VC_WARRANTY_TOKEN=' + str(re.findall('VC_WARRANTY_TOKEN=(.*?);', str(res.headers['Set-Cookie']))).replace("'",'').replace(']','').replace('[','')
     #print(VC_WARRANTY_TOKEN)
@@ -92,7 +90,7 @@ def get_activation_info(VC_WARRANTY_TOKEN,UUID,key,captcha_code):
             #get_data = str(re.findall('"data":{(.*?)}', str(res.text)))
             goodsname = baseinfo["goodsName"]
             activetime = baseinfo["activeTime"]
-            
+
             try:
                 repair_start = serviceinfo["repairStartTime"]
             except Exception as e:
