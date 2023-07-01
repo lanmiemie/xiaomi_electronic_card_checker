@@ -31,6 +31,12 @@ def send_request(imei):
             info_data = getjson["data"]
             phonenum = str(info_data["phone"]).replace("'",'').replace(']','').replace('[','')
             lock_or_unlock = str(info_data["locked"]).replace("'",'').replace(']','').replace('[','')
+            if lock_or_unlock == 'True':
+                lock_or_unlock = "已上锁"
+            elif lock_or_unlock == 'False':
+                lock_or_unlock = "未上锁"
+            else:
+                lock_or_unlock = "Unknown"
             emailnum = str(info_data["email"]).replace("'",'').replace(']','').replace('[','')
             timeStamp = float(getjson["ts"])/1000
             print(timeStamp)
@@ -43,6 +49,12 @@ def send_request(imei):
             info_data = getjson["data"]
             phonenum = str(info_data["phone"]).replace("'",'').replace(']','').replace('[','')
             lock_or_unlock = str(info_data["locked"]).replace("'",'').replace(']','').replace('[','')
+            if lock_or_unlock == 'True':
+                lock_or_unlock = "已上锁"
+            elif lock_or_unlock == 'False':
+                lock_or_unlock = "未上锁"
+            else:
+                lock_or_unlock = "Unknown"
             timeStamp = float(getjson["ts"])/1000
             print(timeStamp)
             timeArray = time.localtime(timeStamp)
@@ -54,6 +66,12 @@ def send_request(imei):
             info_data = getjson["data"]
             emailnum = str(info_data["email"]).replace("'",'').replace(']','').replace('[','')
             lock_or_unlock = str(info_data["locked"]).replace("'",'').replace(']','').replace('[','')
+            if lock_or_unlock == 'True':
+                lock_or_unlock = "已上锁"
+            elif lock_or_unlock == 'False':
+                lock_or_unlock = "未上锁"
+            else:
+                lock_or_unlock = "Unknown"
             timeStamp = float(getjson["ts"])/1000
             print(timeStamp)
             timeArray = time.localtime(timeStamp)

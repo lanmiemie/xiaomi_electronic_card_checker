@@ -20,16 +20,16 @@ from xiaomiapi import *
 
 root = Tk()
 #root.attributes("-alpha", 0.8)
-ver = "1.0.0"
+ver = "1.1.0"
 title='小米电子保卡查询 - 测试版 '+ver
 root.title(title)
-tmp = open("xueanquan.ico","wb+")
+tmp = open("favicon.ico","wb+")
 tmp.write(base64.b64decode(img))
 tmp.close()
 global tmpico
-tmpico = ImageTk.PhotoImage(file="xueanquan.ico")
+tmpico = ImageTk.PhotoImage(file="favicon.ico")
 root.iconphoto(False ,tmpico)
-os.remove("xueanquan.ico")
+os.remove("favicon.ico")
 #root.iconbitmap(".\\backup_user\du.ico")
 winWidth = 345
 winHeight = 310
@@ -49,6 +49,9 @@ lvalue.set("变量值")
 
 timeleftvalue = StringVar()
 timeleftvalue.set("距离保修过期还有: 000 天")
+
+main_menu = Menu(root)
+root.config (menu=main_menu)
 
 def loading_captcha():
     try:
@@ -94,18 +97,6 @@ def backcheckbutton_loading_captcha():
         tkinter.messagebox.showerror(title='失败',message='网络连接失败\n您可以通过以下操作来帮助您排除网络问题\n\n1. 如果您打开了代理（Clash,Socks), 请将它关闭.\n2.检查网络是否通畅.\n3.检查路由器等设施是否正确连接到互联网.\n4.您压根没有连接到互联网.')
         return 0
     loading_captcha()
-    forget_and_back_windows(mode='back')
-
-def forget_and_back_windows(mode):
-    if mode == 'forget':
-        lf1.place_forget()
-        postbutton.place_forget()
-    elif  mode == 'back':
-        lf1.place(x=8, y=8,width=330,height=150)
-        postbutton.place(x=125,y=200)
-        full_device_info_lf.place_forget()
-        curt_device_info_lf.place_forget()
-        backcheckbutton.place_forget()
 
 def post_device_info(key,captcha_code):
     try:
@@ -114,10 +105,48 @@ def post_device_info(key,captcha_code):
         tkinter.messagebox.showerror(title='失败',message='网络连接失败\n您可以通过以下操作来帮助您排除网络问题\n\n1. 如果您打开了代理（Clash,Socks), 请将它关闭.\n2.检查网络是否通畅.\n3.检查路由器等设施是否正确连接到互联网.\n4.您压根没有连接到互联网.')
         return 0
     
-    get_state, repair_state, get_msg, all_info, timeleft, repair_end = get_activation_info(VC_WARRANTY_TOKEN, UUID, key, captcha_code)
+    try:
+        get_state, repair_state, get_msg, all_info, timeleft, repair_end = get_activation_info(VC_WARRANTY_TOKEN, UUID, key, captcha_code)
+    except Exception as e:
+        tkinter.messagebox.showerror(title='失败',message='未知错误\n请检查 SN 或 IMEI 码 输入是否正确?')
+        return 0 
     if get_state == '200':
+        root.withdraw()
+        top_for_repair = Toplevel()
+        title='查询成功'
+        top_for_repair.title(title)
+        tmp = open("favicon.ico","wb+")
+        tmp.write(base64.b64decode(img))
+        tmp.close()
+        global tmpico
+        tmpico = ImageTk.PhotoImage(file="favicon.ico")
+        top_for_repair.iconphoto(False ,tmpico)
+        os.remove("favicon.ico")
+        #root.iconbitmap(".\\backup_user\du.ico")
+        winWidth = 345
+        winHeight = 310
+        screenWidth = top_for_repair.winfo_screenwidth()
+        screenHeight = top_for_repair.winfo_screenheight()
+        x = int((screenWidth - winWidth) / 2)
+        y = int((screenHeight - winHeight) / 2)
+        top_for_repair.geometry("%sx%s+%s+%s" % (winWidth, winHeight, x, y))
+        top_for_repair.resizable(0,0)
+
+        def on_closing():
+            backcheckbutton_loading_captcha()
+            top_for_repair.destroy()
+            root.wm_deiconify()
+
+        top_for_repair.protocol("WM_DELETE_WINDOW", on_closing)
+
+        backcheckbutton = tkinter.ttk.Button(top_for_repair,text="重新查询",command=lambda:on_closing())
+        full_device_info_lf = tkinter.ttk.LabelFrame(top_for_repair,text="详细信息")
+        curt_device_info_lf = tkinter.ttk.LabelFrame(top_for_repair,text="保修状态")
+        timeleft_device_info_label = tkinter.ttk.Label(curt_device_info_lf,textvariable=timeleftvalue,foreground="black",font=("黑体", 12))
+        curt_device_info_label = tkinter.ttk.Label(curt_device_info_lf,textvariable=lvalue,font=("黑体", 30))
+        full_device_info_text = scrolledtext.ScrolledText(full_device_info_lf, font=('Consolas', 10))
+
         full_device_info_text.config(state=NORMAL)
-        forget_and_back_windows(mode='forget')
         full_device_info_lf.place(x=8, y=155,width=200,height=150)
         full_device_info_text.pack(fill=BOTH, expand='yes')
         curt_device_info_lf.place(x=8, y=8,width=330,height=145)
@@ -162,12 +191,8 @@ Label(lf1, text="验证码").place(x=30,y=80)
 inp2 = tkinter.ttk.Entry(lf1,width=8)
 port.set('S/N 或 IMEI')
 inp2.place(x=100, y=80)
-backcheckbutton = tkinter.ttk.Button(root,text="重新查询",command=lambda:backcheckbutton_loading_captcha())
-full_device_info_lf = tkinter.ttk.LabelFrame(root,text="详细信息")
-curt_device_info_lf = tkinter.ttk.LabelFrame(root,text="保修状态")
-timeleft_device_info_label = tkinter.ttk.Label(curt_device_info_lf,textvariable=timeleftvalue,foreground="black",font=("黑体", 12))
-curt_device_info_label = tkinter.ttk.Label(curt_device_info_lf,textvariable=lvalue,font=("黑体", 30))
-full_device_info_text = scrolledtext.ScrolledText(full_device_info_lf, font=('Consolas', 10))
+
+#main_menu.add_command(label="查询设备激活锁状态")#, command = lambda:qrcode_login(mode='QRCODE'))
 
 loading_captcha()
 

@@ -129,6 +129,11 @@ def check_activation_lock(imei):
     # Request
     # GET https://i.mi.com/support/anonymous/status
 
+    otherStyleTime = " "
+    lock_or_unlock = " "
+    all_info = " "
+    error_msg = " "
+
     try:
         response = requests.get(
             url="https://i.mi.com/support/anonymous/status",
@@ -148,6 +153,12 @@ def check_activation_lock(imei):
             info_data = getjson["data"]
             phonenum = str(info_data["phone"]).replace("'",'').replace(']','').replace('[','')
             lock_or_unlock = str(info_data["locked"]).replace("'",'').replace(']','').replace('[','')
+            if lock_or_unlock == 'True':
+                lock_or_unlock = "已上锁"
+            elif lock_or_unlock == 'False':
+                lock_or_unlock = "未上锁"
+            else:
+                lock_or_unlock = "Unknown"
             emailnum = str(info_data["email"]).replace("'",'').replace(']','').replace('[','')
             timeStamp = float(getjson["ts"])/1000
             print(timeStamp)
@@ -160,6 +171,12 @@ def check_activation_lock(imei):
             info_data = getjson["data"]
             phonenum = str(info_data["phone"]).replace("'",'').replace(']','').replace('[','')
             lock_or_unlock = str(info_data["locked"]).replace("'",'').replace(']','').replace('[','')
+            if lock_or_unlock == 'True':
+                lock_or_unlock = "已上锁"
+            elif lock_or_unlock == 'False':
+                lock_or_unlock = "未上锁"
+            else:
+                lock_or_unlock = "Unknown"
             timeStamp = float(getjson["ts"])/1000
             print(timeStamp)
             timeArray = time.localtime(timeStamp)
@@ -171,6 +188,12 @@ def check_activation_lock(imei):
             info_data = getjson["data"]
             emailnum = str(info_data["email"]).replace("'",'').replace(']','').replace('[','')
             lock_or_unlock = str(info_data["locked"]).replace("'",'').replace(']','').replace('[','')
+            if lock_or_unlock == 'True':
+                lock_or_unlock = "已上锁"
+            elif lock_or_unlock == 'False':
+                lock_or_unlock = "未上锁"
+            else:
+                lock_or_unlock = "Unknown"
             timeStamp = float(getjson["ts"])/1000
             print(timeStamp)
             timeArray = time.localtime(timeStamp)
@@ -178,12 +201,13 @@ def check_activation_lock(imei):
             all_info = '绑定邮箱: {0}\n激活锁状态: {1}\n查询时间: {2}'.format(emailnum,lock_or_unlock,otherStyleTime)
             print(all_info)
         else:
-            print('\n未上锁或是IMEI输入错误 ..')
+            error_msg = "无法查询到该设备的激活锁状态或是IMEI输入错误"
+            print(error_msg)
 
     except requests.exceptions.RequestException:
         print('\nConnect fail due to some network error ..')
 
-    return all_info
+    return lock_or_unlock,otherStyleTime,all_info,error_msg
 
     #print(res.text)
 
